@@ -1,15 +1,12 @@
 import { createTheme } from '@mui/material'
 
 const COLORS = {
-	// Акценты
-	primary: '#1ABB9C', // mint/teal (статистика, кнопки)
-	info: '#3498DB', // голубой (графики/ссылки)
-	// Навигация
-	sidebarBg: '#2A3F54', // тёмный синий
+	primary: '#1ABB9C',
+	info: '#3498DB',
+	sidebarBg: '#2A3F54',
 	sidebarText: '#ECF0F1',
-	// Базовые
 	paper: '#FFFFFF',
-	bg: '#F5F7FA', // светлый фон страницы
+	bg: '#F5F7FA',
 	border: '#E0E6ED',
 	text: '#34495E',
 }

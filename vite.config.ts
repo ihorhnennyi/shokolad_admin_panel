@@ -1,7 +1,15 @@
-import { defineConfig } from 'vite'
+/// <reference types="node" />
 import react from '@vitejs/plugin-react'
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+	plugins: [react()],
+	resolve: {
+		alias: {
+			'@': fileURLToPath(new URL('./src', import.meta.url)),
+		},
+	},
+	server: { port: 5173, open: false },
+	build: { sourcemap: true, chunkSizeWarningLimit: 1200 },
 })

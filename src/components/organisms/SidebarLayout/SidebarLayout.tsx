@@ -1,3 +1,4 @@
+import { Header } from '@/components/organisms'
 import CategoryIcon from '@mui/icons-material/Category'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import InventoryIcon from '@mui/icons-material/Inventory'
@@ -15,12 +16,15 @@ import {
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import Header from './Header'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_WIDTH = 72
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function SidebarLayout({
+	children,
+}: {
+	children: React.ReactNode
+}) {
 	const theme = useTheme()
 	const [open, setOpen] = useState(true)
 	const { pathname } = useLocation()

@@ -1,13 +1,7 @@
+import { SidebarLayout } from '@/components/organisms'
+import { Categories, Dashboard, Orders, Products, Users } from '@/pages'
+import { ForgotPassword, Login, ResetPassword } from '@/pages/Auth'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Layout from '../components/Layout'
-import Categories from '../pages/Categories'
-import Dashboard from '../pages/Dashboard'
-import ForgotPassword from '../pages/ForgotPassword'
-import Login from '../pages/Login'
-import Orders from '../pages/Orders'
-import Products from '../pages/Products'
-import ResetPassword from '../pages/ResetPassword'
-import Users from '../pages/Users'
 
 const router = createBrowserRouter([
 	{ path: '/login', element: <Login /> },
@@ -16,41 +10,41 @@ const router = createBrowserRouter([
 	{
 		path: '/',
 		element: (
-			<Layout>
+			<SidebarLayout>
 				<Dashboard />
-			</Layout>
+			</SidebarLayout>
 		),
 	},
 	{
 		path: '/products',
 		element: (
-			<Layout>
+			<SidebarLayout>
 				<Products />
-			</Layout>
+			</SidebarLayout>
 		),
 	},
 	{
 		path: '/categories',
 		element: (
-			<Layout>
+			<SidebarLayout>
 				<Categories />
-			</Layout>
+			</SidebarLayout>
 		),
 	},
 	{
 		path: '/orders',
 		element: (
-			<Layout>
+			<SidebarLayout>
 				<Orders />
-			</Layout>
+			</SidebarLayout>
 		),
 	},
 	{
 		path: '/users',
 		element: (
-			<Layout>
+			<SidebarLayout>
 				<Users />
-			</Layout>
+			</SidebarLayout>
 		),
 	},
 ])

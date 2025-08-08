@@ -16,7 +16,7 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import AuthCard from '../components/AuthCard'
+import AuthCard from '../../../components/molecules/AuthCard'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
