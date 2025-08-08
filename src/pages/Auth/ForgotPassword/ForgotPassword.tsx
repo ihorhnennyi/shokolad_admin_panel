@@ -1,3 +1,4 @@
+import { forgotPassword } from '@/shared/services/authService'
 import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
@@ -9,14 +10,21 @@ export default function ForgotPassword() {
 	const [email, setEmail] = useState('')
 	const [sent, setSent] = useState(false)
 	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string>('')
 
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
+		setError('')
 		try {
-			// TODO: POST /auth/forgot-password { email }
-			await new Promise(r => setTimeout(r, 600))
+			await forgotPassword(email)
 			setSent(true)
+		} catch (err: any) {
+			const msg =
+				err?.response?.data?.message ||
+				err?.message ||
+				'Не вдалося надіслати лист. Спробуйте ще раз.'
+			setError(msg)
 		} finally {
 			setLoading(false)
 		}
@@ -105,6 +113,11 @@ export default function ForgotPassword() {
 							>
 								{loading ? 'Відправка...' : 'Надіслати посилання'}
 							</Button>
+							{error && (
+								<Typography variant='caption' color='error' textAlign='center'>
+									{error}
+								</Typography>
+							)}
 						</>
 					)}
 

@@ -13,7 +13,7 @@ const NotFound = lazy(() => import('@/pages/NotFound'))
 export const publicRoutes: RouteObject[] = [
 	{ path: '/login', element: <Login /> },
 	{ path: '/forgot-password', element: <ForgotPassword /> },
-	{ path: '/reset-password/:token', element: <ResetPassword /> },
+	{ path: '/reset-password', element: <ResetPassword /> },
 ]
 
 export const appRoutes: RouteObject = {

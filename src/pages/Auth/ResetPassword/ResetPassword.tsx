@@ -1,3 +1,4 @@
+// src/pages/Auth/ResetPassword/ResetPassword.tsx
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import LockIcon from '@mui/icons-material/Lock'
@@ -16,14 +17,24 @@ import {
 	Typography,
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
+import {
+	Link as RouterLink,
+	useNavigate,
+	useParams,
+	useSearchParams,
+} from 'react-router-dom'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
 const MIN_LENGTH = 8
 
 export default function ResetPassword() {
-	const { token } = useParams<{ token: string }>()
+	// поддержим оба способа: /reset-password/:token И /reset-password?token=...
+	const { token: tokenFromPath } = useParams<{ token: string }>()
+	const [sp] = useSearchParams()
+	const tokenFromQuery = sp.get('token') ?? undefined
+	const token = tokenFromPath ?? tokenFromQuery
+
 	const navigate = useNavigate()
 
 	const [showPwd1, setShowPwd1] = useState(false)
@@ -41,7 +52,7 @@ export default function ResetPassword() {
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
-		if (!token) return
+		if (!token) return // нет токена — смысла слать запрос нет
 		setLoading(true)
 		try {
 			// TODO: POST /auth/reset-password { token, password: pwd }
@@ -115,12 +126,11 @@ export default function ResetPassword() {
 					position: 'relative',
 				}}
 			>
-				{/* Индикатор загрузки */}
 				<Backdrop
 					open={loading}
 					sx={{
 						color: '#fff',
-						zIndex: theme => theme.zIndex.drawer + 1,
+						zIndex: t => t.zIndex.drawer + 1,
 						borderRadius: 4,
 						position: 'absolute',
 						inset: 0,
@@ -143,7 +153,6 @@ export default function ResetPassword() {
 
 					{showForm ? (
 						<>
-							{/* Новый пароль */}
 							<TextField
 								label='Новий пароль'
 								type={showPwd1 ? 'text' : 'password'}
@@ -171,7 +180,6 @@ export default function ResetPassword() {
 								}}
 							/>
 
-							{/* Подтверждение */}
 							<TextField
 								label='Підтвердження пароля'
 								type={showPwd2 ? 'text' : 'password'}
@@ -201,7 +209,7 @@ export default function ResetPassword() {
 
 							<Button
 								type='submit'
-								disabled={invalid || loading}
+								disabled={invalid || loading || !token}
 								sx={{
 									py: 1.2,
 									fontWeight: 800,
@@ -213,6 +221,12 @@ export default function ResetPassword() {
 							>
 								Змінити пароль
 							</Button>
+
+							{!token && (
+								<Typography variant='caption' color='error' textAlign='center'>
+									Посилання некоректне: відсутній <code>token</code> у URL.
+								</Typography>
+							)}
 						</>
 					) : (
 						<>

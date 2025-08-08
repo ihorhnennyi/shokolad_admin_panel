@@ -19,3 +19,8 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
 	})
 	return data
 }
+
+export async function forgotPassword(email: string) {
+	const { data } = await api.post('/auth/forgot-password', { email })
+	return data
+}
