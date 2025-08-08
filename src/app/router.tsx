@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Layout from '../components/Layout'
 import Categories from '../pages/Categories'
 import Dashboard from '../pages/Dashboard'
+import ForgotPassword from '../pages/ForgotPassword'
 import Login from '../pages/Login'
 import Orders from '../pages/Orders'
 import Products from '../pages/Products'
@@ -9,6 +10,7 @@ import Users from '../pages/Users'
 
 const router = createBrowserRouter([
 	{ path: '/login', element: <Login /> },
+	{ path: '/forgot-password', element: <ForgotPassword /> },
 	{
 		path: '/',
 		element: (
