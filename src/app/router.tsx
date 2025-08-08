@@ -1,9 +1,8 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import Layout from '../components/Layout.tsx'
+import Layout from '../components/Layout'
 import Categories from '../pages/Categories'
 import Dashboard from '../pages/Dashboard'
 import Login from '../pages/Login'
-import NotFound from '../pages/NotFound'
 import Orders from '../pages/Orders'
 import Products from '../pages/Products'
 import Users from '../pages/Users'
@@ -50,7 +49,6 @@ const router = createBrowserRouter([
 			</Layout>
 		),
 	},
-	{ path: '*', element: <NotFound /> },
 ])
 
 export default function AppRouter() {
