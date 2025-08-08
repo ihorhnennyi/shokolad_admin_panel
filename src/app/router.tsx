@@ -6,11 +6,13 @@ import ForgotPassword from '../pages/ForgotPassword'
 import Login from '../pages/Login'
 import Orders from '../pages/Orders'
 import Products from '../pages/Products'
+import ResetPassword from '../pages/ResetPassword'
 import Users from '../pages/Users'
 
 const router = createBrowserRouter([
 	{ path: '/login', element: <Login /> },
 	{ path: '/forgot-password', element: <ForgotPassword /> },
+	{ path: '/reset-password/:token', element: <ResetPassword /> },
 	{
 		path: '/',
 		element: (

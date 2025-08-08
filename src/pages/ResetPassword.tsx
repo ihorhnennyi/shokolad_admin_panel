@@ -1,0 +1,280 @@
+// src/pages/ResetPassword.tsx
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import LockIcon from '@mui/icons-material/Lock'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
+import {
+	Backdrop,
+	Box,
+	Button,
+	CircularProgress,
+	IconButton,
+	InputAdornment,
+	Paper,
+	Stack,
+	TextField,
+	Typography,
+} from '@mui/material'
+import { useEffect, useMemo, useState } from 'react'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
+
+const BG = '#2A3F54'
+const ACCENT = '#1ABB9C'
+
+export default function ResetPassword() {
+	const { token } = useParams<{ token: string }>()
+	const nav = useNavigate()
+
+	const [show1, setShow1] = useState(false)
+	const [show2, setShow2] = useState(false)
+	const [pwd, setPwd] = useState('')
+	const [pwd2, setPwd2] = useState('')
+	const [loading, setLoading] = useState(false)
+	const [done, setDone] = useState<'ok' | 'err' | null>(null)
+	const [seconds, setSeconds] = useState(5)
+
+	const minLen = 8
+	const tooShort = pwd.length > 0 && pwd.length < minLen
+	const mismatch = pwd2.length > 0 && pwd !== pwd2
+	const invalid = !pwd || !pwd2 || tooShort || mismatch
+
+	async function submit(e: React.FormEvent) {
+		e.preventDefault()
+		if (!token) return
+		setLoading(true)
+		try {
+			// TODO: POST /auth/reset-password { token, password: pwd }
+			await new Promise(r => setTimeout(r, 1000)) // имитація API
+			setDone('ok')
+		} catch {
+			setDone('err')
+		} finally {
+			setLoading(false)
+		}
+	}
+
+	// Стартуємо таймер 5с після успіху і редіректимо на /login
+	useEffect(() => {
+		if (done !== 'ok') return
+		setSeconds(5)
+		const iv = setInterval(() => {
+			setSeconds(s => {
+				if (s <= 1) {
+					clearInterval(iv)
+					nav('/login', { replace: true })
+					return 0
+				}
+				return s - 1
+			})
+		}, 1000)
+		return () => clearInterval(iv)
+	}, [done, nav])
+
+	// Чи показувати форму (ховаємо, якщо done === 'ok')
+	const showForm = useMemo(() => done !== 'ok', [done])
+
+	return (
+		<Box
+			sx={{
+				minHeight: '100vh',
+				bgcolor: BG,
+				display: 'grid',
+				placeItems: 'center',
+				p: 2,
+				position: 'relative',
+			}}
+		>
+			{/* водяний знак */}
+			<Box
+				aria-hidden
+				sx={{
+					position: 'absolute',
+					inset: 0,
+					display: 'grid',
+					placeItems: 'center',
+					opacity: 0.07,
+				}}
+			>
+				<Box
+					component='img'
+					src='/logo.webp'
+					alt=''
+					sx={{ width: 360, filter: 'brightness(0)' }}
+				/>
+			</Box>
+
+			<Paper
+				elevation={0}
+				sx={{
+					zIndex: 1,
+					width: 420,
+					p: 4,
+					borderRadius: 4,
+					backdropFilter: 'blur(8px)',
+					background:
+						'linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.88))',
+					boxShadow: '0 20px 40px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.08)',
+					border: '1px solid rgba(255,255,255,.6)',
+					position: 'relative',
+				}}
+			>
+				{/* Крутилка-оверлей під час сабміту */}
+				<Backdrop
+					open={loading}
+					sx={{
+						color: '#fff',
+						zIndex: theme => theme.zIndex.drawer + 1,
+						borderRadius: 4,
+						position: 'absolute',
+						inset: 0,
+					}}
+				>
+					<CircularProgress color='inherit' />
+				</Backdrop>
+
+				<Stack spacing={3} component='form' onSubmit={submit}>
+					<Stack alignItems='center' spacing={1}>
+						<Typography variant='h6' fontWeight={800}>
+							Скидання пароля
+						</Typography>
+						<Typography color='text.secondary' fontSize={14} textAlign='center'>
+							{showForm
+								? 'Введіть новий пароль та підтвердіть його.'
+								: 'Пароль успішно змінено.'}
+						</Typography>
+					</Stack>
+
+					{showForm ? (
+						<>
+							{/* Новий пароль */}
+							<TextField
+								label='Новий пароль'
+								type={show1 ? 'text' : 'password'}
+								value={pwd}
+								onChange={e => setPwd(e.target.value)}
+								fullWidth
+								error={tooShort}
+								helperText={tooShort ? `Мінімум ${minLen} символів` : ' '}
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position='start'>
+											<LockIcon fontSize='small' />
+										</InputAdornment>
+									),
+									endAdornment: (
+										<InputAdornment position='end'>
+											<IconButton onClick={() => setShow1(v => !v)} edge='end'>
+												{show1 ? <VisibilityOff /> : <Visibility />}
+											</IconButton>
+										</InputAdornment>
+									),
+								}}
+							/>
+
+							{/* Підтвердження */}
+							<TextField
+								label='Підтвердження пароля'
+								type={show2 ? 'text' : 'password'}
+								value={pwd2}
+								onChange={e => setPwd2(e.target.value)}
+								fullWidth
+								error={mismatch}
+								helperText={mismatch ? 'Паролі не співпадають' : ' '}
+								InputProps={{
+									startAdornment: (
+										<InputAdornment position='start'>
+											<LockIcon fontSize='small' />
+										</InputAdornment>
+									),
+									endAdornment: (
+										<InputAdornment position='end'>
+											<IconButton onClick={() => setShow2(v => !v)} edge='end'>
+												{show2 ? <VisibilityOff /> : <Visibility />}
+											</IconButton>
+										</InputAdornment>
+									),
+								}}
+							/>
+
+							<Button
+								type='submit'
+								disabled={invalid || loading}
+								sx={{
+									py: 1.2,
+									fontWeight: 800,
+									borderRadius: 999,
+									background: ACCENT,
+									color: '#fff',
+									'&:hover': { background: ACCENT, opacity: 0.95 },
+								}}
+							>
+								{loading ? 'Зберігаємо...' : 'Змінити пароль'}
+							</Button>
+						</>
+					) : (
+						<>
+							{/* Успішний результат + таймер + кнопка */}
+							<Stack
+								direction='row'
+								alignItems='center'
+								spacing={1}
+								justifyContent='center'
+								color='success.main'
+							>
+								<CheckCircleIcon fontSize='small' />
+								<Typography>Пароль успішно змінено.</Typography>
+							</Stack>
+
+							<Typography textAlign='center' color='text.secondary'>
+								Перенаправлення на сторінку входу через <b>{seconds}</b> с.
+							</Typography>
+
+							<Button
+								onClick={() => nav('/login', { replace: true })}
+								sx={{
+									py: 1.1,
+									fontWeight: 700,
+									borderRadius: 999,
+									background: ACCENT,
+									color: '#fff',
+									'&:hover': { background: ACCENT, opacity: 0.95 },
+								}}
+							>
+								Перейти до входу зараз
+							</Button>
+						</>
+					)}
+
+					{done === 'err' && (
+						<Stack
+							direction='row'
+							alignItems='center'
+							spacing={1}
+							justifyContent='center'
+							color='error.main'
+						>
+							<ErrorOutlineIcon fontSize='small' />
+							<Typography>Сталася помилка. Спробуйте ще раз.</Typography>
+						</Stack>
+					)}
+
+					{showForm && (
+						<Typography
+							variant='caption'
+							color='text.secondary'
+							textAlign='center'
+						>
+							<RouterLink
+								to='/login'
+								style={{ color: 'inherit', textDecoration: 'underline' }}
+							>
+								Повернутися до входу
+							</RouterLink>
+						</Typography>
+					)}
+				</Stack>
+			</Paper>
+		</Box>
+	)
+}
