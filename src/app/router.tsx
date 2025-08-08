@@ -1,54 +1,13 @@
-import { SidebarLayout } from '@/components/organisms'
-import { Categories, Dashboard, Orders, Products, Users } from '@/pages'
-import { ForgotPassword, Login, ResetPassword } from '@/pages/Auth'
+import { Suspense } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import routes from './routes'
 
-const router = createBrowserRouter([
-	{ path: '/login', element: <Login /> },
-	{ path: '/forgot-password', element: <ForgotPassword /> },
-	{ path: '/reset-password/:token', element: <ResetPassword /> },
-	{
-		path: '/',
-		element: (
-			<SidebarLayout>
-				<Dashboard />
-			</SidebarLayout>
-		),
-	},
-	{
-		path: '/products',
-		element: (
-			<SidebarLayout>
-				<Products />
-			</SidebarLayout>
-		),
-	},
-	{
-		path: '/categories',
-		element: (
-			<SidebarLayout>
-				<Categories />
-			</SidebarLayout>
-		),
-	},
-	{
-		path: '/orders',
-		element: (
-			<SidebarLayout>
-				<Orders />
-			</SidebarLayout>
-		),
-	},
-	{
-		path: '/users',
-		element: (
-			<SidebarLayout>
-				<Users />
-			</SidebarLayout>
-		),
-	},
-])
+const router = createBrowserRouter(routes)
 
 export default function AppRouter() {
-	return <RouterProvider router={router} />
+	return (
+		<Suspense fallback={null}>
+			<RouterProvider router={router} />
+		</Suspense>
+	)
 }

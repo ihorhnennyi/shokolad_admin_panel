@@ -15,16 +15,12 @@ import {
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_WIDTH = 72
 
-export default function SidebarLayout({
-	children,
-}: {
-	children: React.ReactNode
-}) {
+export default function SidebarLayout() {
 	const theme = useTheme()
 	const [open, setOpen] = useState(true)
 	const { pathname } = useLocation()
@@ -168,7 +164,9 @@ export default function SidebarLayout({
 					/>
 				</Box>
 
-				<Box sx={{ position: 'relative', zIndex: 1 }}>{children}</Box>
+				<Box sx={{ position: 'relative', zIndex: 1 }}>
+					<Outlet />
+				</Box>
 			</Box>
 		</Box>
 	)
