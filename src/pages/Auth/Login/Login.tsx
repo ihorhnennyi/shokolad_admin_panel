@@ -1,4 +1,4 @@
-// src/pages/Login.tsx
+import { login as loginRequest } from '@/shared/services/authService'
 import EmailIcon from '@mui/icons-material/Email'
 import LockIcon from '@mui/icons-material/Lock'
 import Visibility from '@mui/icons-material/Visibility'
@@ -27,15 +27,32 @@ export default function Login() {
 	const [pass, setPass] = useState('')
 	const [remember, setRemember] = useState(true)
 	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string>('')
 	const nav = useNavigate()
 
 	const onSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
+		setError('')
+
 		try {
-			// TODO: POST /auth/login
-			await new Promise(r => setTimeout(r, 600))
-			nav('/')
+			const res = await loginRequest({ email, password: pass, remember })
+			// сохраним токен (если бэкенд его выдаёт)
+			if (res?.accessToken) {
+				const storage = remember ? localStorage : sessionStorage
+				storage.setItem('access_token', res.accessToken)
+			}
+			// опционально: можно настроить axios на будущее
+			// api.defaults.headers.common.Authorization = `Bearer ${res.accessToken}`
+
+			nav('/') // как и было
+		} catch (err: any) {
+			// аккуратно извлекаем текст из ответа бэка
+			const msg =
+				err?.response?.data?.message ||
+				err?.message ||
+				'Помилка входу. Спробуйте ще раз.'
+			setError(msg)
 		} finally {
 			setLoading(false)
 		}
