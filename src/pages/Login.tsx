@@ -10,13 +10,13 @@ import {
 	FormControlLabel,
 	IconButton,
 	InputAdornment,
-	Paper,
 	Stack,
 	TextField,
 	Typography,
 } from '@mui/material'
 import { useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import AuthCard from '../components/AuthCard'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
@@ -33,13 +33,15 @@ export default function Login() {
 		e.preventDefault()
 		setLoading(true)
 		try {
-			// TODO: call /auth/login
+			// TODO: POST /auth/login
 			await new Promise(r => setTimeout(r, 600))
 			nav('/')
 		} finally {
 			setLoading(false)
 		}
 	}
+
+	const disabled = !email || !pass || loading
 
 	return (
 		<Box
@@ -52,7 +54,7 @@ export default function Login() {
 				p: 2,
 			}}
 		>
-			{/* водяний знак */}
+			{/* Водяной знак */}
 			<Box
 				aria-hidden
 				sx={{
@@ -67,28 +69,12 @@ export default function Login() {
 				<Box
 					component='img'
 					src='/logo.webp'
-					alt=''
-					sx={{
-						width: 420,
-						filter: 'brightness(0)', // чорний логотип
-					}}
+					alt='background logo'
+					sx={{ width: 420, filter: 'brightness(0)' }}
 				/>
 			</Box>
 
-			<Paper
-				elevation={0}
-				sx={{
-					zIndex: 1,
-					width: 420,
-					p: 4,
-					borderRadius: 2,
-					backdropFilter: 'blur(8px)',
-					background:
-						'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.88))',
-					boxShadow: '0 20px 40px rgba(0,0,0,.25), 0 2px 10px rgba(0,0,0,.08)',
-					border: '1px solid rgba(255,255,255,.6)',
-				}}
-			>
+			<AuthCard>
 				<Stack spacing={3} component='form' onSubmit={onSubmit}>
 					<Stack alignItems='center' spacing={1}>
 						<Box
@@ -96,12 +82,11 @@ export default function Login() {
 							src='/logo.webp'
 							alt='logo'
 							sx={{
-								width: 350,
-								filter: 'brightness(0)', // чорний логотип
-								opacity: 0.3,
+								width: 300,
+								filter: 'brightness(0)',
+								opacity: 0.4,
 							}}
 						/>
-
 						<Typography color='text.secondary' fontSize={14}>
 							Вхід до панелі керування
 						</Typography>
@@ -113,6 +98,7 @@ export default function Login() {
 						value={email}
 						onChange={e => setEmail(e.target.value)}
 						fullWidth
+						autoFocus
 						InputProps={{
 							startAdornment: (
 								<InputAdornment position='start'>
@@ -121,6 +107,7 @@ export default function Login() {
 							),
 						}}
 					/>
+
 					<TextField
 						label='Пароль'
 						type={show ? 'text' : 'password'}
@@ -155,7 +142,7 @@ export default function Login() {
 
 					<Button
 						type='submit'
-						disabled={!email || !pass || loading}
+						disabled={disabled}
 						sx={{
 							py: 1.2,
 							fontWeight: 800,
@@ -170,7 +157,6 @@ export default function Login() {
 						{loading ? 'Вхід...' : 'Увійти'}
 					</Button>
 
-					{/* Посилання на сторінку відновлення паролю */}
 					<Typography
 						variant='caption'
 						color='text.secondary'
@@ -184,7 +170,7 @@ export default function Login() {
 						</RouterLink>
 					</Typography>
 				</Stack>
-			</Paper>
+			</AuthCard>
 		</Box>
 	)
 }

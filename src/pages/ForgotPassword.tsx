@@ -13,10 +13,13 @@ export default function ForgotPassword() {
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setLoading(true)
-		// TODO: підключити POST /auth/forgot-password { email }
-		await new Promise(r => setTimeout(r, 600))
-		setSent(true)
-		setLoading(false)
+		try {
+			// TODO: POST /auth/forgot-password { email }
+			await new Promise(r => setTimeout(r, 600))
+			setSent(true)
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	return (
@@ -30,7 +33,7 @@ export default function ForgotPassword() {
 				position: 'relative',
 			}}
 		>
-			{/* легкий водяний знак */}
+			{/* Водяной знак */}
 			<Box
 				aria-hidden
 				sx={{
@@ -44,7 +47,7 @@ export default function ForgotPassword() {
 				<Box
 					component='img'
 					src='/logo.webp'
-					alt=''
+					alt='background logo'
 					sx={{ width: 380, filter: 'brightness(0)' }}
 				/>
 			</Box>
@@ -86,6 +89,7 @@ export default function ForgotPassword() {
 								value={email}
 								onChange={e => setEmail(e.target.value)}
 								fullWidth
+								autoFocus
 							/>
 							<Button
 								type='submit'
@@ -99,7 +103,7 @@ export default function ForgotPassword() {
 									'&:hover': { background: ACCENT, opacity: 0.95 },
 								}}
 							>
-								Надіслати посилання
+								{loading ? 'Відправка...' : 'Надіслати посилання'}
 							</Button>
 						</>
 					)}

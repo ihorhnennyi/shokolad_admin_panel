@@ -1,4 +1,3 @@
-// src/pages/ResetPassword.tsx
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import LockIcon from '@mui/icons-material/Lock'
@@ -21,23 +20,24 @@ import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
+const MIN_LENGTH = 8
 
 export default function ResetPassword() {
 	const { token } = useParams<{ token: string }>()
-	const nav = useNavigate()
+	const navigate = useNavigate()
 
-	const [show1, setShow1] = useState(false)
-	const [show2, setShow2] = useState(false)
+	const [showPwd1, setShowPwd1] = useState(false)
+	const [showPwd2, setShowPwd2] = useState(false)
 	const [pwd, setPwd] = useState('')
 	const [pwd2, setPwd2] = useState('')
 	const [loading, setLoading] = useState(false)
-	const [done, setDone] = useState<'ok' | 'err' | null>(null)
+	const [status, setStatus] = useState<'ok' | 'err' | null>(null)
 	const [seconds, setSeconds] = useState(5)
 
-	const minLen = 8
-	const tooShort = pwd.length > 0 && pwd.length < minLen
+	const tooShort = pwd.length > 0 && pwd.length < MIN_LENGTH
 	const mismatch = pwd2.length > 0 && pwd !== pwd2
 	const invalid = !pwd || !pwd2 || tooShort || mismatch
+	const showForm = useMemo(() => status !== 'ok', [status])
 
 	async function submit(e: React.FormEvent) {
 		e.preventDefault()
@@ -45,34 +45,30 @@ export default function ResetPassword() {
 		setLoading(true)
 		try {
 			// TODO: POST /auth/reset-password { token, password: pwd }
-			await new Promise(r => setTimeout(r, 1000)) // имитація API
-			setDone('ok')
+			await new Promise(r => setTimeout(r, 1000))
+			setStatus('ok')
 		} catch {
-			setDone('err')
+			setStatus('err')
 		} finally {
 			setLoading(false)
 		}
 	}
 
-	// Стартуємо таймер 5с після успіху і редіректимо на /login
 	useEffect(() => {
-		if (done !== 'ok') return
+		if (status !== 'ok') return
 		setSeconds(5)
 		const iv = setInterval(() => {
 			setSeconds(s => {
 				if (s <= 1) {
 					clearInterval(iv)
-					nav('/login', { replace: true })
+					navigate('/login', { replace: true })
 					return 0
 				}
 				return s - 1
 			})
 		}, 1000)
 		return () => clearInterval(iv)
-	}, [done, nav])
-
-	// Чи показувати форму (ховаємо, якщо done === 'ok')
-	const showForm = useMemo(() => done !== 'ok', [done])
+	}, [status, navigate])
 
 	return (
 		<Box
@@ -85,7 +81,7 @@ export default function ResetPassword() {
 				position: 'relative',
 			}}
 		>
-			{/* водяний знак */}
+			{/* Лого-фон */}
 			<Box
 				aria-hidden
 				sx={{
@@ -99,7 +95,7 @@ export default function ResetPassword() {
 				<Box
 					component='img'
 					src='/logo.webp'
-					alt=''
+					alt='background logo'
 					sx={{ width: 360, filter: 'brightness(0)' }}
 				/>
 			</Box>
@@ -119,7 +115,7 @@ export default function ResetPassword() {
 					position: 'relative',
 				}}
 			>
-				{/* Крутилка-оверлей під час сабміту */}
+				{/* Индикатор загрузки */}
 				<Backdrop
 					open={loading}
 					sx={{
@@ -147,15 +143,15 @@ export default function ResetPassword() {
 
 					{showForm ? (
 						<>
-							{/* Новий пароль */}
+							{/* Новый пароль */}
 							<TextField
 								label='Новий пароль'
-								type={show1 ? 'text' : 'password'}
+								type={showPwd1 ? 'text' : 'password'}
 								value={pwd}
 								onChange={e => setPwd(e.target.value)}
 								fullWidth
 								error={tooShort}
-								helperText={tooShort ? `Мінімум ${minLen} символів` : ' '}
+								helperText={tooShort ? `Мінімум ${MIN_LENGTH} символів` : ' '}
 								InputProps={{
 									startAdornment: (
 										<InputAdornment position='start'>
@@ -164,18 +160,21 @@ export default function ResetPassword() {
 									),
 									endAdornment: (
 										<InputAdornment position='end'>
-											<IconButton onClick={() => setShow1(v => !v)} edge='end'>
-												{show1 ? <VisibilityOff /> : <Visibility />}
+											<IconButton
+												onClick={() => setShowPwd1(v => !v)}
+												edge='end'
+											>
+												{showPwd1 ? <VisibilityOff /> : <Visibility />}
 											</IconButton>
 										</InputAdornment>
 									),
 								}}
 							/>
 
-							{/* Підтвердження */}
+							{/* Подтверждение */}
 							<TextField
 								label='Підтвердження пароля'
-								type={show2 ? 'text' : 'password'}
+								type={showPwd2 ? 'text' : 'password'}
 								value={pwd2}
 								onChange={e => setPwd2(e.target.value)}
 								fullWidth
@@ -189,8 +188,11 @@ export default function ResetPassword() {
 									),
 									endAdornment: (
 										<InputAdornment position='end'>
-											<IconButton onClick={() => setShow2(v => !v)} edge='end'>
-												{show2 ? <VisibilityOff /> : <Visibility />}
+											<IconButton
+												onClick={() => setShowPwd2(v => !v)}
+												edge='end'
+											>
+												{showPwd2 ? <VisibilityOff /> : <Visibility />}
 											</IconButton>
 										</InputAdornment>
 									),
@@ -209,17 +211,16 @@ export default function ResetPassword() {
 									'&:hover': { background: ACCENT, opacity: 0.95 },
 								}}
 							>
-								{loading ? 'Зберігаємо...' : 'Змінити пароль'}
+								Змінити пароль
 							</Button>
 						</>
 					) : (
 						<>
-							{/* Успішний результат + таймер + кнопка */}
 							<Stack
 								direction='row'
 								alignItems='center'
-								spacing={1}
 								justifyContent='center'
+								spacing={1}
 								color='success.main'
 							>
 								<CheckCircleIcon fontSize='small' />
@@ -231,7 +232,7 @@ export default function ResetPassword() {
 							</Typography>
 
 							<Button
-								onClick={() => nav('/login', { replace: true })}
+								onClick={() => navigate('/login', { replace: true })}
 								sx={{
 									py: 1.1,
 									fontWeight: 700,
@@ -246,12 +247,12 @@ export default function ResetPassword() {
 						</>
 					)}
 
-					{done === 'err' && (
+					{status === 'err' && (
 						<Stack
 							direction='row'
 							alignItems='center'
-							spacing={1}
 							justifyContent='center'
+							spacing={1}
 							color='error.main'
 						>
 							<ErrorOutlineIcon fontSize='small' />
