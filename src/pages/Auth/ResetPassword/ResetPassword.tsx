@@ -1,19 +1,10 @@
-// src/pages/Auth/ResetPassword/ResetPassword.tsx
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
-import LockIcon from '@mui/icons-material/Lock'
-import Visibility from '@mui/icons-material/Visibility'
-import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import {
 	Backdrop,
 	Box,
-	Button,
 	CircularProgress,
-	IconButton,
-	InputAdornment,
 	Paper,
 	Stack,
-	TextField,
 	Typography,
 } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
@@ -24,62 +15,57 @@ import {
 	useSearchParams,
 } from 'react-router-dom'
 
+import ErrorAlert from '@/components/molecules/Auth/ErrorAlert'
+import PasswordField from '@/components/molecules/Auth/PasswordField'
+import SubmitButton from '@/components/molecules/Auth/SubmitButton'
+import { useResetPassword } from '@/shared/hooks/useResetPassword'
+import { RESET_MIN_LENGTH } from '@/shared/validation/auth.schemas'
+
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
-const MIN_LENGTH = 8
 
 export default function ResetPassword() {
-	// поддержим оба способа: /reset-password/:token И /reset-password?token=...
+	// поддержим /reset-password/:token и /reset-password?token=...
 	const { token: tokenFromPath } = useParams<{ token: string }>()
 	const [sp] = useSearchParams()
 	const tokenFromQuery = sp.get('token') ?? undefined
 	const token = tokenFromPath ?? tokenFromQuery
 
-	const navigate = useNavigate()
+	const nav = useNavigate()
+	const { loading, error, success, submit } = useResetPassword()
 
-	const [showPwd1, setShowPwd1] = useState(false)
-	const [showPwd2, setShowPwd2] = useState(false)
 	const [pwd, setPwd] = useState('')
-	const [pwd2, setPwd2] = useState('')
-	const [loading, setLoading] = useState(false)
-	const [status, setStatus] = useState<'ok' | 'err' | null>(null)
+	const [confirm, setConfirm] = useState('')
 	const [seconds, setSeconds] = useState(5)
 
-	const tooShort = pwd.length > 0 && pwd.length < MIN_LENGTH
-	const mismatch = pwd2.length > 0 && pwd !== pwd2
-	const invalid = !pwd || !pwd2 || tooShort || mismatch
-	const showForm = useMemo(() => status !== 'ok', [status])
+	const tooShort = pwd.length > 0 && pwd.length < RESET_MIN_LENGTH
+	const mismatch = confirm.length > 0 && pwd !== confirm
+	const disabled = useMemo(
+		() => !token || !pwd || !confirm || tooShort || mismatch || loading,
+		[token, pwd, confirm, tooShort, mismatch, loading]
+	)
 
-	async function submit(e: React.FormEvent) {
+	const onSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		if (!token) return // нет токена — смысла слать запрос нет
-		setLoading(true)
-		try {
-			// TODO: POST /auth/reset-password { token, password: pwd }
-			await new Promise(r => setTimeout(r, 1000))
-			setStatus('ok')
-		} catch {
-			setStatus('err')
-		} finally {
-			setLoading(false)
-		}
+		if (!token) return
+		submit({ token, newPassword: pwd, confirm })
 	}
 
 	useEffect(() => {
-		if (status !== 'ok') return
+		if (!success) return
 		setSeconds(5)
 		const iv = setInterval(() => {
 			setSeconds(s => {
 				if (s <= 1) {
 					clearInterval(iv)
-					navigate('/login', { replace: true })
+					nav('/login', { replace: true })
 					return 0
 				}
 				return s - 1
 			})
 		}, 1000)
 		return () => clearInterval(iv)
-	}, [status, navigate])
+	}, [success, nav])
 
 	return (
 		<Box
@@ -92,7 +78,7 @@ export default function ResetPassword() {
 				position: 'relative',
 			}}
 		>
-			{/* Лого-фон */}
+			{/* фон-лого */}
 			<Box
 				aria-hidden
 				sx={{
@@ -101,6 +87,7 @@ export default function ResetPassword() {
 					display: 'grid',
 					placeItems: 'center',
 					opacity: 0.07,
+					pointerEvents: 'none',
 				}}
 			>
 				<Box
@@ -139,94 +126,65 @@ export default function ResetPassword() {
 					<CircularProgress color='inherit' />
 				</Backdrop>
 
-				<Stack spacing={3} component='form' onSubmit={submit}>
+				<Stack spacing={3} component='form' onSubmit={onSubmit}>
 					<Stack alignItems='center' spacing={1}>
 						<Typography variant='h6' fontWeight={800}>
 							Скидання пароля
 						</Typography>
 						<Typography color='text.secondary' fontSize={14} textAlign='center'>
-							{showForm
-								? 'Введіть новий пароль та підтвердіть його.'
-								: 'Пароль успішно змінено.'}
+							{success
+								? 'Пароль успішно змінено.'
+								: 'Введіть новий пароль та підтвердіть його.'}
 						</Typography>
 					</Stack>
 
-					{showForm ? (
-						<>
-							<TextField
-								label='Новий пароль'
-								type={showPwd1 ? 'text' : 'password'}
-								value={pwd}
-								onChange={e => setPwd(e.target.value)}
-								fullWidth
-								error={tooShort}
-								helperText={tooShort ? `Мінімум ${MIN_LENGTH} символів` : ' '}
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position='start'>
-											<LockIcon fontSize='small' />
-										</InputAdornment>
-									),
-									endAdornment: (
-										<InputAdornment position='end'>
-											<IconButton
-												onClick={() => setShowPwd1(v => !v)}
-												edge='end'
-											>
-												{showPwd1 ? <VisibilityOff /> : <Visibility />}
-											</IconButton>
-										</InputAdornment>
-									),
-								}}
-							/>
+					<ErrorAlert message={error} />
 
-							<TextField
+					{!success ? (
+						<>
+							<PasswordField
+								label={`Новий пароль (мін. ${RESET_MIN_LENGTH})`}
+								value={pwd}
+								onChange={setPwd}
+								error={tooShort}
+								helperText={
+									tooShort ? `Мінімум ${RESET_MIN_LENGTH} символів` : ' '
+								}
+							/>
+							<PasswordField
 								label='Підтвердження пароля'
-								type={showPwd2 ? 'text' : 'password'}
-								value={pwd2}
-								onChange={e => setPwd2(e.target.value)}
-								fullWidth
+								value={confirm}
+								onChange={setConfirm}
 								error={mismatch}
 								helperText={mismatch ? 'Паролі не співпадають' : ' '}
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position='start'>
-											<LockIcon fontSize='small' />
-										</InputAdornment>
-									),
-									endAdornment: (
-										<InputAdornment position='end'>
-											<IconButton
-												onClick={() => setShowPwd2(v => !v)}
-												edge='end'
-											>
-												{showPwd2 ? <VisibilityOff /> : <Visibility />}
-											</IconButton>
-										</InputAdornment>
-									),
-								}}
 							/>
-
-							<Button
-								type='submit'
-								disabled={invalid || loading || !token}
-								sx={{
-									py: 1.2,
-									fontWeight: 800,
-									borderRadius: 999,
-									background: ACCENT,
-									color: '#fff',
-									'&:hover': { background: ACCENT, opacity: 0.95 },
-								}}
-							>
-								Змінити пароль
-							</Button>
 
 							{!token && (
 								<Typography variant='caption' color='error' textAlign='center'>
 									Посилання некоректне: відсутній <code>token</code> у URL.
 								</Typography>
 							)}
+
+							<SubmitButton
+								loading={loading}
+								disabled={disabled}
+								accent={ACCENT}
+							>
+								Змінити пароль
+							</SubmitButton>
+
+							<Typography
+								variant='caption'
+								color='text.secondary'
+								textAlign='center'
+							>
+								<RouterLink
+									to='/login'
+									style={{ color: 'inherit', textDecoration: 'underline' }}
+								>
+									Повернутися до входу
+								</RouterLink>
+							</Typography>
 						</>
 					) : (
 						<>
@@ -245,48 +203,13 @@ export default function ResetPassword() {
 								Перенаправлення на сторінку входу через <b>{seconds}</b> с.
 							</Typography>
 
-							<Button
-								onClick={() => navigate('/login', { replace: true })}
-								sx={{
-									py: 1.1,
-									fontWeight: 700,
-									borderRadius: 999,
-									background: ACCENT,
-									color: '#fff',
-									'&:hover': { background: ACCENT, opacity: 0.95 },
-								}}
+							<SubmitButton
+								onClick={() => nav('/login', { replace: true })}
+								accent={ACCENT}
 							>
 								Перейти до входу зараз
-							</Button>
+							</SubmitButton>
 						</>
-					)}
-
-					{status === 'err' && (
-						<Stack
-							direction='row'
-							alignItems='center'
-							justifyContent='center'
-							spacing={1}
-							color='error.main'
-						>
-							<ErrorOutlineIcon fontSize='small' />
-							<Typography>Сталася помилка. Спробуйте ще раз.</Typography>
-						</Stack>
-					)}
-
-					{showForm && (
-						<Typography
-							variant='caption'
-							color='text.secondary'
-							textAlign='center'
-						>
-							<RouterLink
-								to='/login'
-								style={{ color: 'inherit', textDecoration: 'underline' }}
-							>
-								Повернутися до входу
-							</RouterLink>
-						</Typography>
 					)}
 				</Stack>
 			</Paper>
