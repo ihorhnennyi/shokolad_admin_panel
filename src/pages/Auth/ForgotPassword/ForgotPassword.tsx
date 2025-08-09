@@ -1,33 +1,25 @@
-import { forgotPassword } from '@/shared/services/authService'
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
-import { useState } from 'react'
+import EmailIcon from '@mui/icons-material/Email'
+import { Box, Paper, Stack, Typography } from '@mui/material'
+import { useMemo, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+
+import ErrorAlert from '@/components/molecules/Auth/ErrorAlert'
+import IconTextField from '@/components/molecules/Auth/IconTextField'
+import SubmitButton from '@/components/molecules/Auth/SubmitButton'
+import { useForgotPassword } from '@/shared/hooks/useForgotPassword'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
 
 export default function ForgotPassword() {
+	const { loading, error, sent, submit } = useForgotPassword()
 	const [email, setEmail] = useState('')
-	const [sent, setSent] = useState(false)
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState<string>('')
 
-	const submit = async (e: React.FormEvent) => {
+	const disabled = useMemo(() => !email || loading, [email, loading])
+
+	const onSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		setLoading(true)
-		setError('')
-		try {
-			await forgotPassword(email)
-			setSent(true)
-		} catch (err: any) {
-			const msg =
-				err?.response?.data?.message ||
-				err?.message ||
-				'Не вдалося надіслати лист. Спробуйте ще раз.'
-			setError(msg)
-		} finally {
-			setLoading(false)
-		}
+		submit({ email })
 	}
 
 	return (
@@ -50,6 +42,7 @@ export default function ForgotPassword() {
 					display: 'grid',
 					placeItems: 'center',
 					opacity: 0.07,
+					pointerEvents: 'none',
 				}}
 			>
 				<Box
@@ -74,7 +67,7 @@ export default function ForgotPassword() {
 					border: '1px solid rgba(255,255,255,.6)',
 				}}
 			>
-				<Stack spacing={3} component='form' onSubmit={submit}>
+				<Stack spacing={3} component='form' onSubmit={onSubmit}>
 					<Stack alignItems='center' spacing={1}>
 						<Typography variant='h6' fontWeight={800}>
 							Відновлення пароля
@@ -84,6 +77,8 @@ export default function ForgotPassword() {
 						</Typography>
 					</Stack>
 
+					<ErrorAlert message={error} />
+
 					{sent ? (
 						<Typography textAlign='center'>
 							Якщо такий email існує, ми надіслали лист із посиланням для
@@ -91,33 +86,21 @@ export default function ForgotPassword() {
 						</Typography>
 					) : (
 						<>
-							<TextField
+							<IconTextField
 								label='Email'
 								type='email'
 								value={email}
-								onChange={e => setEmail(e.target.value)}
-								fullWidth
+								onChange={setEmail}
+								icon={<EmailIcon fontSize='small' />}
 								autoFocus
 							/>
-							<Button
-								type='submit'
-								disabled={!email || loading}
-								sx={{
-									py: 1.2,
-									fontWeight: 800,
-									borderRadius: 999,
-									background: ACCENT,
-									color: '#fff',
-									'&:hover': { background: ACCENT, opacity: 0.95 },
-								}}
+							<SubmitButton
+								loading={loading}
+								disabled={disabled}
+								accent={ACCENT}
 							>
-								{loading ? 'Відправка...' : 'Надіслати посилання'}
-							</Button>
-							{error && (
-								<Typography variant='caption' color='error' textAlign='center'>
-									{error}
-								</Typography>
-							)}
+								Надіслати посилання
+							</SubmitButton>
 						</>
 					)}
 

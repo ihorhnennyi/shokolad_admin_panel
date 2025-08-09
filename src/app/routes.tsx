@@ -2,6 +2,7 @@ import { SidebarLayout } from '@/components/organisms'
 import { ForgotPassword, Login, ResetPassword } from '@/pages/Auth'
 import { lazy } from 'react'
 import type { RouteObject } from 'react-router-dom'
+import AuthProviderRoute from './AuthProviderRoute'
 import { ProtectedRoute, PublicOnlyRoute } from './routerGuards'
 
 const Dashboard = lazy(() => import('@/pages/Dashboard'))
@@ -11,7 +12,7 @@ const Orders = lazy(() => import('@/pages/Orders'))
 const Users = lazy(() => import('@/pages/Users'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
-export const publicRoutes: RouteObject = {
+const publicRoutes: RouteObject = {
 	element: <PublicOnlyRoute />,
 	children: [
 		{ path: '/login', element: <Login /> },
@@ -20,7 +21,7 @@ export const publicRoutes: RouteObject = {
 	],
 }
 
-export const appRoutes: RouteObject = {
+const appRoutes: RouteObject = {
 	element: <ProtectedRoute />,
 	children: [
 		{
@@ -37,10 +38,13 @@ export const appRoutes: RouteObject = {
 	],
 }
 
-export const fallbackRoutes: RouteObject = {
-	path: '*',
-	element: <NotFound />,
-}
+const fallbackRoutes: RouteObject = { path: '*', element: <NotFound /> }
 
-const routes: RouteObject[] = [publicRoutes, appRoutes, fallbackRoutes]
+const routes: RouteObject[] = [
+	{
+		element: <AuthProviderRoute />,
+		children: [publicRoutes, appRoutes, fallbackRoutes],
+	},
+]
+
 export default routes
