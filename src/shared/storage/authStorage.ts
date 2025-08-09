@@ -5,9 +5,10 @@ const EMAIL = 'last_login_email'
 const pick = (remember?: boolean) => (remember ? localStorage : sessionStorage)
 
 export const authStorage = {
-	saveTokens(access: string, refresh?: string, remember?: boolean) {
+	// допускаем undefined — просто не пишем ключ
+	saveTokens(access?: string, refresh?: string, remember?: boolean) {
 		const s = pick(remember)
-		s.setItem(AK, access)
+		if (access) s.setItem(AK, access)
 		if (refresh) s.setItem(RK, refresh)
 	},
 	loadAccess() {
