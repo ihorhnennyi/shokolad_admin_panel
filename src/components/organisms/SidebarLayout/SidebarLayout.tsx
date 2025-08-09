@@ -1,21 +1,11 @@
+// src/components/organisms/Sidebar/SidebarLayout.tsx
 import { Header } from '@/components/organisms'
-import CategoryIcon from '@mui/icons-material/Category'
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import InventoryIcon from '@mui/icons-material/Inventory'
-import PeopleIcon from '@mui/icons-material/People'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import {
-	Box,
-	Drawer,
-	List,
-	ListItemButton,
-	ListItemIcon,
-	ListItemText,
-	Tooltip,
-} from '@mui/material'
+import SidebarFooter from '@/components/organisms/Sidebar/SidebarFooter'
+import SidebarNav from '@/components/organisms/Sidebar/SidebarNav'
+import { Box, Drawer } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { useMemo, useState } from 'react'
-import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_WIDTH = 72
@@ -23,7 +13,6 @@ const COLLAPSED_WIDTH = 72
 export default function SidebarLayout() {
 	const theme = useTheme()
 	const [open, setOpen] = useState(true)
-	const { pathname } = useLocation()
 
 	const APPBAR_HEIGHT = useMemo(() => {
 		const h = (theme.mixins.toolbar as any)?.minHeight
@@ -31,16 +20,6 @@ export default function SidebarLayout() {
 	}, [theme])
 
 	const drawerW = open ? DRAWER_WIDTH : COLLAPSED_WIDTH
-
-	const nav = [
-		{ label: 'Дашборд', path: '/', icon: <DashboardIcon /> },
-		{ label: 'Товары', path: '/products', icon: <InventoryIcon /> },
-		{ label: 'Категории', path: '/categories', icon: <CategoryIcon /> },
-		{ label: 'Заказы', path: '/orders', icon: <ShoppingCartIcon /> },
-		{ label: 'Пользователи', path: '/users', icon: <PeopleIcon /> },
-	]
-	const isActive = (to: string) =>
-		pathname === to || (to !== '/' && pathname.startsWith(to + '/'))
 
 	return (
 		<Box
@@ -72,9 +51,12 @@ export default function SidebarLayout() {
 						backgroundColor: '#2A3F54',
 						color: '#fff',
 						borderRight: 'none',
+						display: 'flex',
+						flexDirection: 'column',
 					},
 				}}
 			>
+				{/* Лого/спейсер под AppBar */}
 				<Box
 					sx={{
 						height: `${APPBAR_HEIGHT}px`,
@@ -82,6 +64,7 @@ export default function SidebarLayout() {
 						alignItems: 'center',
 						justifyContent: 'center',
 						borderBottom: '1px solid rgba(255,255,255,0.1)',
+						flexShrink: 0,
 					}}
 				>
 					<Box
@@ -92,38 +75,14 @@ export default function SidebarLayout() {
 					/>
 				</Box>
 
-				<List sx={{ px: 1, mt: 1 }}>
-					{nav.map(item => {
-						const active = isActive(item.path)
-						return (
-							<Tooltip
-								key={item.path}
-								title={!open ? item.label : ''}
-								placement='right'
-							>
-								<ListItemButton
-									component={RouterLink}
-									to={item.path}
-									sx={{
-										borderRadius: 1.5,
-										mb: 0.5,
-										'& .MuiListItemIcon-root': { color: 'inherit' },
-										...(active && {
-											bgcolor: 'primary.main',
-											color: '#fff',
-											'&:hover': { bgcolor: 'primary.main' },
-										}),
-									}}
-								>
-									<ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-									{open && <ListItemText primary={item.label} />}
-								</ListItemButton>
-							</Tooltip>
-						)
-					})}
-				</List>
+				{/* Список навигации */}
+				<SidebarNav collapsed={!open} />
+
+				{/* Кнопка выхода внизу */}
+				<SidebarFooter collapsed={!open} />
 			</Drawer>
 
+			{/* Контент */}
 			<Box
 				component='main'
 				sx={{
@@ -157,10 +116,7 @@ export default function SidebarLayout() {
 						component='img'
 						src='/logo.webp'
 						alt=''
-						sx={{
-							width: 'min(40vw, 520px)',
-							height: 'auto',
-						}}
+						sx={{ width: 'min(40vw, 520px)', height: 'auto' }}
 					/>
 				</Box>
 
