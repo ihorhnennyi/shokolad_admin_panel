@@ -1,64 +1,43 @@
-import { login as loginRequest } from '@/shared/services/authService'
 import EmailIcon from '@mui/icons-material/Email'
-import LockIcon from '@mui/icons-material/Lock'
-import Visibility from '@mui/icons-material/Visibility'
-import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import {
 	Box,
-	Button,
 	Checkbox,
 	FormControlLabel,
-	IconButton,
-	InputAdornment,
 	Stack,
-	TextField,
 	Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import AuthCard from '../../../components/molecules/AuthCard'
+
+import ErrorAlert from '@/components/molecules/Auth/ErrorAlert'
+import IconTextField from '@/components/molecules/Auth/IconTextField'
+import PasswordField from '@/components/molecules/Auth/PasswordField'
+import SubmitButton from '@/components/molecules/Auth/SubmitButton'
+import AuthCard from '@/components/molecules/AuthCard'
+
+import { useLogin } from '@/shared/hooks/useLogin'
+import { authStorage } from '@/shared/storage/authStorage'
 
 const BG = '#2A3F54'
 const ACCENT = '#1ABB9C'
 
 export default function Login() {
-	const [show, setShow] = useState(false)
-	const [email, setEmail] = useState('')
-	const [pass, setPass] = useState('')
-	const [remember, setRemember] = useState(true)
-	const [loading, setLoading] = useState(false)
-	const [error, setError] = useState<string>('')
 	const nav = useNavigate()
+	const { loading, error, submit } = useLogin()
 
-	const onSubmit = async (e: React.FormEvent) => {
+	const [email, setEmail] = useState(authStorage.loadLastEmail())
+	const [password, setPassword] = useState('')
+	const [remember, setRemember] = useState(true)
+
+	const disabled = useMemo(
+		() => !email || !password || loading,
+		[email, password, loading]
+	)
+
+	const onSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		setLoading(true)
-		setError('')
-
-		try {
-			const res = await loginRequest({ email, password: pass, remember })
-			// сохраним токен (если бэкенд его выдаёт)
-			if (res?.accessToken) {
-				const storage = remember ? localStorage : sessionStorage
-				storage.setItem('access_token', res.accessToken)
-			}
-			// опционально: можно настроить axios на будущее
-			// api.defaults.headers.common.Authorization = `Bearer ${res.accessToken}`
-
-			nav('/') // как и было
-		} catch (err: any) {
-			// аккуратно извлекаем текст из ответа бэка
-			const msg =
-				err?.response?.data?.message ||
-				err?.message ||
-				'Помилка входу. Спробуйте ще раз.'
-			setError(msg)
-		} finally {
-			setLoading(false)
-		}
+		submit({ email, password, remember }, () => nav('/'))
 	}
-
-	const disabled = !email || !pass || loading
 
 	return (
 		<Box
@@ -98,54 +77,25 @@ export default function Login() {
 							component='img'
 							src='/logo.webp'
 							alt='logo'
-							sx={{
-								width: 300,
-								filter: 'brightness(0)',
-								opacity: 0.4,
-							}}
+							sx={{ width: 300, filter: 'brightness(0)', opacity: 0.4 }}
 						/>
 						<Typography color='text.secondary' fontSize={14}>
 							Вхід до панелі керування
 						</Typography>
 					</Stack>
 
-					<TextField
+					<ErrorAlert message={error} />
+
+					<IconTextField
 						label='Email'
 						type='email'
 						value={email}
-						onChange={e => setEmail(e.target.value)}
-						fullWidth
+						onChange={setEmail}
+						icon={<EmailIcon fontSize='small' />}
 						autoFocus
-						InputProps={{
-							startAdornment: (
-								<InputAdornment position='start'>
-									<EmailIcon fontSize='small' />
-								</InputAdornment>
-							),
-						}}
 					/>
 
-					<TextField
-						label='Пароль'
-						type={show ? 'text' : 'password'}
-						value={pass}
-						onChange={e => setPass(e.target.value)}
-						fullWidth
-						InputProps={{
-							startAdornment: (
-								<InputAdornment position='start'>
-									<LockIcon fontSize='small' />
-								</InputAdornment>
-							),
-							endAdornment: (
-								<InputAdornment position='end'>
-									<IconButton onClick={() => setShow(v => !v)} edge='end'>
-										{show ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</InputAdornment>
-							),
-						}}
-					/>
+					<PasswordField value={password} onChange={setPassword} />
 
 					<FormControlLabel
 						control={
@@ -157,22 +107,9 @@ export default function Login() {
 						label='Запам’ятати мене'
 					/>
 
-					<Button
-						type='submit'
-						disabled={disabled}
-						sx={{
-							py: 1.2,
-							fontWeight: 800,
-							borderRadius: 999,
-							background: ACCENT,
-							color: '#fff',
-							'&:hover': { background: ACCENT, opacity: 0.95 },
-							boxShadow:
-								'0 6px 16px rgba(26,187,156,.35), 0 2px 6px rgba(0,0,0,.06)',
-						}}
-					>
-						{loading ? 'Вхід...' : 'Увійти'}
-					</Button>
+					<SubmitButton loading={loading} disabled={disabled} accent={ACCENT}>
+						Увійти
+					</SubmitButton>
 
 					<Typography
 						variant='caption'
