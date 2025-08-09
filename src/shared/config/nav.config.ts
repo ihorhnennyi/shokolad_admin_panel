@@ -9,8 +9,8 @@ export type NavItem = { label: string; path: string; icon: ElementType }
 
 export const NAV_ITEMS: NavItem[] = [
 	{ label: 'Дашборд', path: '/', icon: DashboardIcon },
-	{ label: 'Товары', path: '/products', icon: InventoryIcon },
-	{ label: 'Категории', path: '/categories', icon: CategoryIcon },
-	{ label: 'Заказы', path: '/orders', icon: ShoppingCartIcon },
-	{ label: 'Пользователи', path: '/users', icon: PeopleIcon },
+	{ label: 'Товари', path: '/products', icon: InventoryIcon },
+	{ label: 'Категорії', path: '/categories', icon: CategoryIcon },
+	{ label: 'Замовлення', path: '/orders', icon: ShoppingCartIcon },
+	{ label: 'Користувачі', path: '/users', icon: PeopleIcon },
 ]

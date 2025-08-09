@@ -1,4 +1,3 @@
-// src/components/organisms/Sidebar/SidebarLayout.tsx
 import { Header } from '@/components/organisms'
 import SidebarFooter from '@/components/organisms/Sidebar/SidebarFooter'
 import SidebarNav from '@/components/organisms/Sidebar/SidebarNav'

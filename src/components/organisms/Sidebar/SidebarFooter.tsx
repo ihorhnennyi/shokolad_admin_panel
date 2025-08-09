@@ -1,4 +1,3 @@
-// src/components/organisms/Sidebar/SidebarFooter.tsx
 import { authStorage } from '@/shared/storage/authStorage'
 import LogoutIcon from '@mui/icons-material/Logout'
 import {
@@ -19,7 +18,7 @@ export default function SidebarFooter({ collapsed }: { collapsed: boolean }) {
 
 	return (
 		<Box sx={{ mt: 'auto', px: 1, pb: 1 }}>
-			<Tooltip title={collapsed ? 'Выход' : ''} placement='right'>
+			<Tooltip title={collapsed ? 'Вихід' : ''} placement='right'>
 				<ListItemButton
 					onClick={handleLogout}
 					sx={{
@@ -32,7 +31,7 @@ export default function SidebarFooter({ collapsed }: { collapsed: boolean }) {
 					<ListItemIcon sx={{ minWidth: 40 }}>
 						<LogoutIcon />
 					</ListItemIcon>
-					{!collapsed && <ListItemText primary='Выход' />}
+					{!collapsed && <ListItemText primary='Вихід' />}
 				</ListItemButton>
 			</Tooltip>
 		</Box>

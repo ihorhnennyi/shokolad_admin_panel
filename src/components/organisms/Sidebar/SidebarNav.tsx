@@ -1,4 +1,3 @@
-// src/components/organisms/Sidebar/SidebarNav.tsx
 import { NAV_ITEMS } from '@/shared/config/nav.config'
 import { List } from '@mui/material'
 import { useLocation } from 'react-router-dom'
